@@ -19,21 +19,28 @@ public class Table  {
 
     /**
      * Adds a card to the table.
-     *
      * @param card The card to be added to the table.
      */
     public Boolean addCardOnTheTable(Card card) {
         Card currentCardOnTheTable = this.cardsTable.get(this.cardsTable.size() - 1);
 
+        System.out.println("Current card on the table: Color = " + currentCardOnTheTable.getColor() + ", Value = " + currentCardOnTheTable.getValue());
+        System.out.println("Card to be added: Color = " + card.getColor() + ", Value = " + card.getValue());
+
         if (currentCardOnTheTable.getColor().equals(card.getColor()) ||
-                currentCardOnTheTable.getValue().equals(card.getValue())
+                currentCardOnTheTable.getValue().equals(card.getValue()) ||
+                currentCardOnTheTable.getColor().equals("NON_COLOR") ||
+                card.getColor().equals("NON_COLOR")
         ) {
             this.cardsTable.add(card);
+            System.out.println("Card added to the table.");
             return true;
         }
 
+        System.out.println("Card not added to the table.");
         return false;
     }
+
 
     public ArrayList<Card> getCardsTable() {
         return cardsTable;

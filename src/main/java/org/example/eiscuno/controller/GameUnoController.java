@@ -2,6 +2,9 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -12,6 +15,7 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 
 /**
  * Controller class for the Uno game.
@@ -27,12 +31,17 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    private ImageView barajaButton;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
     private Table table;
     private GameUno gameUno;
     private int posInitCardToShow;
+    @FXML
+    private Label machineCounter;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
@@ -43,16 +52,19 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this.machineCounter);
+        threadPlayMachine.start();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table, this.threadPlayMachine);
         this.gameUno.startGame();
         this.tableImageView.setImage(this.table.getCardsTable().get(0).getImage());
+        Image barajaImage = new Image(String.valueOf(getClass().getResource(EISCUnoEnum.DECK_OF_CARDS.getFilePath())));
+        this.barajaButton.setImage(barajaImage);
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
-
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
-        threadPlayMachine.start();
     }
 
     /**
@@ -63,8 +75,8 @@ public class GameUnoController {
         this.machinePlayer = new Player("MACHINE_PLAYER");
         this.deck = new Deck();
         this.table = new Table();
-        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+        this.machineCounter = new Label();
     }
 
     /**
@@ -77,9 +89,11 @@ public class GameUnoController {
         for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
-
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                    if(this.gameUno.playCard(card)){
+                    if(!this.threadPlayMachine.getHasPlayerPlayed() && this.gameUno.playCard(card)){
+
+                        System.err.println("Click on card, play logic working");
+
                         this.tableImageView.setImage(card.getImage());
                         this.humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                         this.threadPlayMachine.setHasPlayerPlayed(true);
@@ -91,6 +105,25 @@ public class GameUnoController {
         }
     }
 
+    
+    /**
+     * Prints the human player's cards on the grid pane.
+     */
+    public void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
+        String folderCardPath = EISCUnoEnum.CARD_UNO.getFilePath();
+
+        for (int i = 0; i < 3; i++) { 
+            Card foldedCard = new Card(folderCardPath, "1", "red");
+            this.gridPaneCardsMachine.add(foldedCard.getCard(), i, 0);
+        };
+
+        String machineCardsCount = String.valueOf(this.machinePlayer.getCardsPlayer().size());
+
+        machineCounter = new Label(machineCardsCount);
+        System.err.println(machineCardsCount);
+        this.gridPaneCardsMachine.add(machineCounter, 3,0);
+    }
 
 
     /**
@@ -140,9 +173,15 @@ public class GameUnoController {
      * @param event the action event
      */
     @FXML
-    void onHandleTakeCard(ActionEvent event) {
+    void onHandleTakeCard(MouseEvent event) {
         // Implement logic to take a card here
+        System.err.println("Taking card");
+        this.humanPlayer.addCard(this.deck.takeCard());
+        printCardsHumanPlayer();
+        onHandleNext(new ActionEvent());
+        this.threadPlayMachine.setHasPlayerPlayed(true);
     }
+
 
     /**
      * Handles the action of saying "Uno".

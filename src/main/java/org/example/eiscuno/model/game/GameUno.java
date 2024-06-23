@@ -2,6 +2,7 @@ package org.example.eiscuno.model.game;
 
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
+import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
@@ -15,6 +16,7 @@ public class GameUno implements IGameUno {
     private Player machinePlayer;
     private Deck deck;
     private Table table;
+    private ThreadPlayMachine threadPlayMachine;
 
     /**
      * Constructs a new GameUno instance.
@@ -24,11 +26,12 @@ public class GameUno implements IGameUno {
      * @param deck          The deck of cards used in the game.
      * @param table         The table where cards are placed during the game.
      */
-    public GameUno(Player humanPlayer, Player machinePlayer, Deck deck, Table table) {
+    public GameUno(Player humanPlayer, Player machinePlayer, Deck deck, Table table, ThreadPlayMachine threadPlayMachine) {
         this.humanPlayer = humanPlayer;
         this.machinePlayer = machinePlayer;
         this.deck = deck;
         this.table = table;
+        this.threadPlayMachine = threadPlayMachine;
     }
 
     /**
@@ -113,6 +116,10 @@ public class GameUno implements IGameUno {
             numberOfCards = 2;
         } else if (card.getValue().contains("+4")) {
             numberOfCards = 4;
+        }else if (card.getValue().contains("SKIP")){
+            this.threadPlayMachine.setHasPlayerPlayed(false);
+        }else if(card.getValue().contains("REVERSE")){
+            this.threadPlayMachine.setHasPlayerPlayed(false);
         }
 
         if(numberOfCards > 0){

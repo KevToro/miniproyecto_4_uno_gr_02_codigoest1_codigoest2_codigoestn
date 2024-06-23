@@ -3,6 +3,7 @@ package org.example.eiscuno.model.table;
 import javafx.stage.Stage;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
+import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
@@ -22,7 +23,8 @@ class TableTest extends ApplicationTest {
        var machinePlayer = new Player("MACHINE_PLAYER");
        var deck = new Deck();
        var table = new Table();
-       var gameUno = new GameUno(humanPlayer, machinePlayer, deck, table);
+       //var threadMachine = new ThreadPlayMachine(null, null, null, null, null);
+       //var gameUno = new GameUno(humanPlayer, machinePlayer, deck, table, threadMachine);
 
        boolean isRedCardPut = false;
        while (!isRedCardPut){
